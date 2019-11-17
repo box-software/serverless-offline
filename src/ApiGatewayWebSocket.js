@@ -156,7 +156,19 @@ module.exports = class ApiGatewayWebSocket {
       }
 
       if (p) {
-        p.catch((err) => {
+        /// PATCH
+        /// Sends the response to the WS client, if there's any
+        /// Works only in proxy mode
+        p.then((res) => {
+          if (res && res.statusCode) {
+            if (/2\d{2}/.test(res.statusCode))
+              !!res.body && ws.send(res.body);
+            else
+              sendError(new Error(`error ${res.statusCode}: ${res.body}`));
+          }
+        })
+        /// END PATCH
+        .catch((err) => {
           sendError(err);
         });
       }
